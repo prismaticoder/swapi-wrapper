@@ -11,7 +11,7 @@ export class SwapiClientService {
   private readonly baseUrl: string =
     this.configService.get<string>('swapi.baseUrl');
 
-  public readonly CACHE_TTL = 60000;
+  public readonly CACHE_TTL = 300_000;
 
   private useCache = true;
 
