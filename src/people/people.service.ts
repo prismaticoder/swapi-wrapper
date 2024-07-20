@@ -1,14 +1,20 @@
 import { Injectable, Scope } from '@nestjs/common';
 import { People } from './entities/people.entity';
-import { SwapiClientService } from 'src/common/swapi-client.service';
+import { SwapiQueryBuilder } from 'src/common/swapi-query.builder';
 import { SwapiResource } from 'src/common/enums/swapi.resource';
 
 @Injectable()
 export class PeopleService {
-  constructor(private readonly swapiClient: SwapiClientService) {}
+  constructor(private readonly starWarsApi: SwapiQueryBuilder) {}
 
-  async findAll(): Promise<People[]> {
-    const response = await this.swapiClient.query(SwapiResource.People).get();
+  async findAll(page = 1, filters: any): Promise<People[]> {
+    const baseQuery = this.starWarsApi.query(SwapiResource.People);
+
+    if (filters && filters.name) {
+      baseQuery.where('search', filters.name);
+    }
+
+    const response = await baseQuery.get({ page });
 
     response.results = response.results.map((result) => {
       return this.formatResponse(result);
@@ -18,7 +24,7 @@ export class PeopleService {
   }
 
   async findById(id: number): Promise<Partial<People> | null> {
-    const response = await this.swapiClient
+    const response = await this.starWarsApi
       .query(SwapiResource.People)
       .load([
         'films:title',

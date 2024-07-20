@@ -1,14 +1,20 @@
-import { Injectable, Scope } from '@nestjs/common';
-import { SwapiClientService } from 'src/common/swapi-client.service';
-import { SwapiResource } from 'src/common/enums/swapi.resource';
+import { Injectable } from '@nestjs/common';
+import { SwapiQueryBuilder } from 'src/common/swapi-query.builder';
 import { Planet } from './entities/planet.entity';
+import { SwapiResource } from 'src/common/enums/swapi.resource';
 
 @Injectable()
 export class PlanetService {
-  constructor(private readonly swapiClient: SwapiClientService) {}
+  constructor(private readonly starWarsApi: SwapiQueryBuilder) {}
 
-  async findAll(): Promise<Planet[]> {
-    const response = await this.swapiClient.query(SwapiResource.Planets).get();
+  async findAll(page = 1, filters: any): Promise<Planet[]> {
+    const baseQuery = this.starWarsApi.query(SwapiResource.Planets);
+
+    if (filters && filters.name) {
+      baseQuery.where('search', filters.name);
+    }
+
+    const response = await baseQuery.get({ page });
 
     response.results = response.results.map((result) => {
       return {
@@ -29,7 +35,7 @@ export class PlanetService {
   }
 
   async findById(id: number): Promise<Partial<Planet> | null> {
-    const response = await this.swapiClient
+    const response = await this.starWarsApi
       .query(SwapiResource.Planets)
       .load(['residents:name', 'films:title'])
       .getById(id);

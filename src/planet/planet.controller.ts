@@ -1,20 +1,17 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { PlanetService } from './planet.service';
-import { Request } from 'express';
 
 @Controller('planets')
 export class PlanetController {
   constructor(private readonly planetService: PlanetService) {}
 
   @Get('')
-  async index() {
-    return await this.planetService.findAll();
+  async index(@Query() query: any) {
+    return await this.planetService.findAll(query.page, query);
   }
 
   @Get(':id')
-  async show(@Req() request: Request) {
-    const { id } = request.params;
-
+  async show(@Param('id') id: string | number) {
     return await this.planetService.findById(Number(id));
   }
 }
