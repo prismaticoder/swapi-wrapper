@@ -8,7 +8,7 @@ export class PlanetService {
   constructor(private readonly swapiClient: SwapiClientService) {}
 
   async findAll(): Promise<Planet[]> {
-    const response = await this.swapiClient.getAll(SwapiResource.Planets);
+    const response = await this.swapiClient.query(SwapiResource.Planets).get();
 
     response.results = response.results.map((result) => {
       return {
@@ -28,46 +28,25 @@ export class PlanetService {
     return response;
   }
 
-  async findById(id: number): Promise<Planet | null> {
-    const response = await this.swapiClient.getSingle(
-      SwapiResource.Planets,
-      id,
-    );
+  async findById(id: number): Promise<Partial<Planet> | null> {
+    const response = await this.swapiClient
+      .query(SwapiResource.Planets)
+      .load(['residents:name', 'films:title'])
+      .getById(id);
 
-    let urlsToFetch = [];
-
-    urlsToFetch = urlsToFetch.concat(response.films);
-    urlsToFetch = urlsToFetch.concat(response.residents);
-
-    const promisesToResolve = urlsToFetch.map((url) =>
-      this.swapiClient.get(url),
-    );
-
-    const fetchedData = await Promise.allSettled(promisesToResolve);
-
-    const films: string[] = [];
-    const residents: string[] = [];
-
-    fetchedData.forEach((data, index) => {
-      if (data.status === 'fulfilled') {
-        const url = urlsToFetch[index];
-
-        if (response.films.includes(url)) {
-          films.push(data.value.title);
-        } else if (response.residents.includes(url)) {
-          residents.push(data.value.name);
-        }
-      }
-
-      if (data.status === 'rejected') {
-        console.error(data.reason);
-      }
-    });
-
-    response.id = response.url.split('/').reverse()[1];
-    response.films = films;
-    response.residents = residents;
-
-    return response;
+    return {
+      id: response.url.split('/').reverse()[1],
+      name: response.name,
+      diameter: response.diameter,
+      rotation_period: response.rotation_period,
+      orbital_period: response.orbital_period,
+      gravity: response.gravity,
+      population: response.population,
+      climate: response.climate,
+      terrain: response.terrain,
+      surface_water: response.surface_water,
+      residents: response.residents,
+      films: response.films,
+    };
   }
 }

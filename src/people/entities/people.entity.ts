@@ -37,21 +37,8 @@ export class People {
   films: string[];
 
   @Column('simple-json')
-  species: string[];
-
-  @Column('simple-json')
   starships: string[];
 
   @Column('simple-json')
   vehicles: string[];
-
-  @Index()
-  @Column()
-  url: string;
-
-  @Column()
-  created: string;
-
-  @Column()
-  edited: string;
 }
