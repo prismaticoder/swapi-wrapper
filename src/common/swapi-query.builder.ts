@@ -3,11 +3,11 @@ import { Inject, Injectable, Scope } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
-import { SwapiResource } from './enums/swapi.resource';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { SwapiResource } from './enums/swapi.resource';
 
 @Injectable({ scope: Scope.REQUEST })
-export class SwapiClientService {
+export class SwapiQueryBuilder {
   private readonly baseUrl: string =
     this.configService.get<string>('swapi.baseUrl');
 
@@ -69,9 +69,7 @@ export class SwapiClientService {
 
     const url = this.constructUrl();
 
-    const response = await this.fetchUrl(url);
-
-    return response;
+    return await this.fetchUrl(url);
   }
 
   async getById(id: number) {
@@ -85,54 +83,7 @@ export class SwapiClientService {
       return response;
     }
 
-    const urlsToFetch = [];
-    const ownerFields = [];
-
-    this.dependenciesToResolve.forEach((field) => {
-      const { resource } = this.deconstructRelation(field);
-
-      if (response[resource]) {
-        const urlValue = response[resource];
-
-        if (urlValue instanceof Array) {
-          urlValue.forEach((url) => {
-            urlsToFetch.push(url);
-            ownerFields.push(field);
-          });
-        } else {
-          urlsToFetch.push(urlValue);
-          ownerFields.push(field);
-        }
-
-        response[resource] = urlValue instanceof Array ? [] : null;
-      }
-    });
-
-    const promisesToResolve = urlsToFetch.map((url) => this.fetchUrl(url));
-
-    const fetchedData = await Promise.allSettled(promisesToResolve);
-
-    fetchedData.forEach((data, index) => {
-      if (data.status === 'fulfilled') {
-        const field = ownerFields[index];
-
-        const [fieldName, columnToGet] = field.split(':');
-
-        const value = columnToGet ? data.value[columnToGet] : data.value;
-
-        if (response[fieldName] instanceof Array) {
-          response[fieldName].push(value);
-        } else {
-          response[fieldName] = value;
-        }
-      }
-
-      if (data.status === 'rejected') {
-        console.error(data.reason);
-      }
-    });
-
-    return response;
+    return await this.resolveDependencies(response);
   }
 
   private constructUrl(): string {
@@ -161,13 +112,45 @@ export class SwapiClientService {
     return url;
   }
 
-  private deconstructRelation(relation: string) {
-    const [resource, column] = relation.split(':');
+  private async resolveDependencies(response: any) {
+    const urlsToFetch = [];
+    const urlIndexMap = [];
 
-    return { resource, column };
+    this.dependenciesToResolve.forEach((field) => {
+      const { resource } = this.deconstructRelation(field);
+
+      if (!response[resource]) {
+        return;
+      }
+
+      const url = response[resource];
+
+      if (url instanceof Array) {
+        url.forEach((url) => {
+          urlsToFetch.push(url);
+          urlIndexMap.push(field);
+        });
+      } else {
+        urlsToFetch.push(url);
+        urlIndexMap.push(field);
+      }
+
+      response[resource] = null;
+    });
+
+    const promisesToResolve = urlsToFetch.map((url) => this.fetchUrl(url));
+
+    const resolvedData = await Promise.allSettled(promisesToResolve);
+
+    const mappedResolvedData = this.mapResolvedDataToResponse(
+      resolvedData,
+      urlIndexMap,
+    );
+
+    return { ...response, ...mappedResolvedData };
   }
 
-  async fetchUrl(url: string) {
+  private async fetchUrl(url: string) {
     // validate base url
     if (!url.startsWith(this.baseUrl)) {
       throw new Error('Invalid URL');
@@ -186,5 +169,45 @@ export class SwapiClientService {
     await this.cacheManager.set(cacheKey, response.data, this.CACHE_TTL);
 
     return JSON.parse(JSON.stringify(response.data));
+  }
+
+  private mapResolvedDataToResponse(
+    resolvedData: any[],
+    urlIndexMap: string[],
+  ) {
+    const response = {};
+
+    resolvedData.forEach((data, index) => {
+      if (data.status === 'fulfilled') {
+        const field = urlIndexMap[index];
+
+        const { resource, column } = this.deconstructRelation(field);
+
+        const value = column ? data.value[column] : data.value;
+
+        if (!response[resource]) {
+          response[resource] = value;
+        } else {
+          response[resource] =
+            response[resource] instanceof Array
+              ? response[resource]
+              : [response[resource]];
+
+          response[resource].push(value);
+        }
+      }
+
+      if (data.status === 'rejected') {
+        console.error(data.reason);
+      }
+    });
+
+    return response;
+  }
+
+  private deconstructRelation(relation: string) {
+    const [resource, column] = relation.split(':');
+
+    return { resource, column };
   }
 }

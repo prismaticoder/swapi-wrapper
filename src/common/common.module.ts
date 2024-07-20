@@ -1,11 +1,11 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
-import { SwapiClientService } from './swapi-client.service';
+import { SwapiQueryBuilder } from './swapi-query.builder';
 import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [HttpModule, CacheModule.register()],
-  providers: [SwapiClientService],
-  exports: [SwapiClientService],
+  providers: [SwapiQueryBuilder],
+  exports: [SwapiQueryBuilder],
 })
 export class CommonModule {}
