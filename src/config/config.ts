@@ -4,4 +4,7 @@ export default () => ({
     name: process.env.DB_NAME,
     type: 'sqlite',
   },
+  swapi: {
+    baseUrl: 'https://swapi.dev/api',
+  },
 });

@@ -16,10 +16,11 @@ import { Specie } from './specie/entities/specie.entity';
 import { Planet } from './planet/entities/planet.entity';
 import { Vehicle } from './vehicle/entities/vehicle.entity';
 import { Starship } from './starship/entities/starship.entity';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ load: [config] }),
+    ConfigModule.forRoot({ load: [config], isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: process.env.DB_NAME,
@@ -32,6 +33,7 @@ import { Starship } from './starship/entities/starship.entity';
     PeopleModule,
     FilmModule,
     PlanetModule,
+    CommonModule,
   ],
   controllers: [AppController],
   providers: [AppService],
