@@ -17,6 +17,7 @@ import { Planet } from './planet/entities/planet.entity';
 import { Vehicle } from './vehicle/entities/vehicle.entity';
 import { Starship } from './starship/entities/starship.entity';
 import { CommonModule } from './common/common.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -34,6 +35,12 @@ import { CommonModule } from './common/common.module';
     FilmModule,
     PlanetModule,
     CommonModule,
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60_000,
+        limit: 60,
+      },
+    ]),
   ],
   controllers: [AppController],
   providers: [AppService],
