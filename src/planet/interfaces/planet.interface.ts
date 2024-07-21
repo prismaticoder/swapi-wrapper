@@ -9,9 +9,6 @@ export interface Planet {
   climate: string;
   terrain: string;
   surface_water: string;
-  residents: string[];
-  films: string[];
-  url: string;
-  created: string;
-  edited: string;
+  residents?: string[];
+  films?: string[];
 }

@@ -141,7 +141,7 @@ describe('PeopleService', () => {
       ]);
     });
 
-    it('should throw a resource not found error when it receives null', async () => {
+    it('should throw a resource not found error when swapi returns null', async () => {
       jest.spyOn(starWarsApiMock, 'getById').mockResolvedValue(null);
 
       expect(async () => {

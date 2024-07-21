@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { SwapiQueryBuilder } from 'src/swapi/swapi-query.builder';
+import { SwapiQueryBuilder } from '../swapi/swapi-query.builder';
 import { Planet } from './interfaces/planet.interface';
-import { SwapiResource } from 'src/swapi/enums/swapi.resource';
-import { PaginatedResult } from 'src/common/interfaces/paginated-result.interface';
+import { SwapiResource } from '../swapi/enums/swapi.resource';
+import { PaginatedResult } from '../common/interfaces/paginated-result.interface';
+import { ResourceNotFound } from '../swapi/exceptions/resource-not-found.exception';
 
 @Injectable()
 export class PlanetService {
@@ -18,29 +19,30 @@ export class PlanetService {
     const response = await baseQuery.get({ page });
 
     response.results = response.results.map((result) => {
-      return {
-        id: result.url.split('/').reverse()[1],
-        name: result.name,
-        diameter: result.diameter,
-        rotation_period: result.rotation_period,
-        orbital_period: result.orbital_period,
-        gravity: result.gravity,
-        population: result.population,
-        climate: result.climate,
-        terrain: result.terrain,
-        surface_water: result.surface_water,
-      };
+      return this.formatResponse(result);
     });
 
     return response;
   }
 
-  async findById(id: number): Promise<Partial<Planet> | null> {
+  async findById(id: number): Promise<Planet | null> {
     const response = await this.starWarsApi
       .query(SwapiResource.Planets)
       .load(['residents:name', 'films:title'])
       .getById(id);
 
+    if (!response) {
+      throw new ResourceNotFound();
+    }
+
+    return {
+      ...this.formatResponse(response),
+      residents: response.residents,
+      films: response.films,
+    };
+  }
+
+  formatResponse(response: any): Planet {
     return {
       id: response.url.split('/').reverse()[1],
       name: response.name,
@@ -52,8 +54,6 @@ export class PlanetService {
       climate: response.climate,
       terrain: response.terrain,
       surface_water: response.surface_water,
-      residents: response.residents,
-      films: response.films,
     };
   }
 }
