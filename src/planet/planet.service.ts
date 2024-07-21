@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { SwapiQueryBuilder } from 'src/swapi/swapi-query.builder';
-import { Planet } from './entities/planet.entity';
+import { Planet } from './interfaces/planet.interface';
 import { SwapiResource } from 'src/swapi/enums/swapi.resource';
 import { PaginatedResult } from 'src/common/interfaces/paginated-result.interface';
 

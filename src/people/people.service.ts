@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { People } from './entities/people.entity';
+import { People } from './interfaces/people.interface';
 import { SwapiQueryBuilder } from 'src/swapi/swapi-query.builder';
 import { SwapiResource } from 'src/swapi/enums/swapi.resource';
 import { PaginatedResult } from 'src/common/interfaces/paginated-result.interface';
