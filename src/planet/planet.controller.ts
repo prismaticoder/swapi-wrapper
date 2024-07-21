@@ -4,14 +4,17 @@ import {
   Get,
   Param,
   Query,
+  UseFilters,
   UseInterceptors,
 } from '@nestjs/common';
 import { PlanetService } from './planet.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { JsonResponse } from 'src/common/helpers/json-response';
+import { SwapiExceptionFilter } from 'src/common/filters/swapi-exception.filter';
 
 @Controller('planets')
 @UseInterceptors(CacheInterceptor)
+@UseFilters(SwapiExceptionFilter)
 @CacheTTL(180)
 export class PlanetController {
   constructor(private readonly planetService: PlanetService) {}

@@ -1,10 +1,13 @@
 import { HttpService } from '@nestjs/axios';
-import { Inject, Injectable, Scope } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Scope } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { SwapiResource } from './enums/swapi.resource';
+import { AxiosError } from 'axios';
+import { ResourceNotFound } from './exceptions/resource-not-found.exception';
+import { ServiceUnavailable } from './exceptions/service-unavailable.exception';
 
 @Injectable({ scope: Scope.REQUEST })
 export class SwapiQueryBuilder {
@@ -12,6 +15,8 @@ export class SwapiQueryBuilder {
     this.configService.get<string>('swapi.baseUrl');
 
   public readonly CACHE_TTL = 300_000;
+
+  public readonly MAX_REQUEST_TIMEOUT = 3000;
 
   private useCache = true;
 
@@ -140,14 +145,12 @@ export class SwapiQueryBuilder {
 
     const promisesToResolve = urlsToFetch.map((url) => this.fetchUrl(url));
 
-    const resolvedData = await Promise.allSettled(promisesToResolve);
-
-    const mappedResolvedData = this.mapResolvedDataToResponse(
-      resolvedData,
+    const resolvedData = await this.resolvePromises(
+      promisesToResolve,
       urlIndexMap,
     );
 
-    return { ...response, ...mappedResolvedData };
+    return { ...response, ...resolvedData };
   }
 
   private async fetchUrl(url: string) {
@@ -156,26 +159,42 @@ export class SwapiQueryBuilder {
       throw new Error('Invalid URL');
     }
 
-    const cacheKey = `swapi:${url}`;
+    try {
+      const cacheKey = `swapi:${url}`;
 
-    const cachedData: any = await this.cacheManager.get(cacheKey);
+      const cachedData: any = await this.cacheManager.get(cacheKey);
 
-    if (cachedData && this.useCache) {
-      return JSON.parse(JSON.stringify(cachedData));
+      if (cachedData && this.useCache) {
+        return JSON.parse(JSON.stringify(cachedData));
+      }
+
+      const response = await lastValueFrom(
+        this.httpService.get(url, { timeout: this.MAX_REQUEST_TIMEOUT }),
+      );
+
+      await this.cacheManager.set(cacheKey, response.data, this.CACHE_TTL);
+
+      return JSON.parse(JSON.stringify(response.data));
+    } catch (exception) {
+      if (exception instanceof AxiosError) {
+        if (exception.response.status === HttpStatus.NOT_FOUND) {
+          throw new ResourceNotFound();
+        } else {
+          throw new ServiceUnavailable();
+        }
+      }
+
+      throw exception;
     }
-
-    const response = await lastValueFrom(this.httpService.get(url));
-
-    await this.cacheManager.set(cacheKey, response.data, this.CACHE_TTL);
-
-    return JSON.parse(JSON.stringify(response.data));
   }
 
-  private mapResolvedDataToResponse(
-    resolvedData: any[],
+  private async resolvePromises(
+    promisesToResolve: any[],
     urlIndexMap: string[],
   ) {
     const response = {};
+
+    const resolvedData = await Promise.allSettled(promisesToResolve);
 
     resolvedData.forEach((data, index) => {
       if (data.status === 'fulfilled') {
