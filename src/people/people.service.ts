@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { People } from './interfaces/people.interface';
-import { SwapiQueryBuilder } from 'src/swapi/swapi-query.builder';
-import { SwapiResource } from 'src/swapi/enums/swapi.resource';
-import { PaginatedResult } from 'src/common/interfaces/paginated-result.interface';
+import { SwapiQueryBuilder } from '../swapi/swapi-query.builder';
+import { SwapiResource } from '../swapi/enums/swapi.resource';
+import { PaginatedResult } from '../common/interfaces/paginated-result.interface';
+import { ResourceNotFound } from '../swapi/exceptions/resource-not-found.exception';
 
 @Injectable()
 export class PeopleService {
@@ -35,6 +36,10 @@ export class PeopleService {
       ])
       .getById(id);
 
+    if (!response) {
+      throw new ResourceNotFound();
+    }
+
     return {
       ...this.formatResponse(response),
       homeworld: response.homeworld,
@@ -44,7 +49,7 @@ export class PeopleService {
     };
   }
 
-  private formatResponse(response: any): People {
+  formatResponse(response: any): People {
     return {
       id: response.url.split('/').reverse()[1],
       name: response.name,
