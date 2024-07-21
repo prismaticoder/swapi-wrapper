@@ -2,12 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { SwapiQueryBuilder } from 'src/swapi/swapi-query.builder';
 import { Planet } from './entities/planet.entity';
 import { SwapiResource } from 'src/swapi/enums/swapi.resource';
+import { PaginatedResult } from 'src/common/interfaces/paginated-result.interface';
 
 @Injectable()
 export class PlanetService {
   constructor(private readonly starWarsApi: SwapiQueryBuilder) {}
 
-  async findAll(page = 1, filters: any): Promise<Planet[]> {
+  async findAll(page = 1, filters: any): Promise<PaginatedResult<Planet>> {
     const baseQuery = this.starWarsApi.query(SwapiResource.Planets);
 
     if (filters && filters.name) {

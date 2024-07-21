@@ -31,14 +31,14 @@ export class People {
   skin_color: string;
 
   @Column()
-  homeworld: string;
+  homeworld?: string;
 
   @Column('simple-json')
-  films: string[];
+  films?: string[];
 
   @Column('simple-json')
-  starships: string[];
+  starships?: string[];
 
   @Column('simple-json')
-  vehicles: string[];
+  vehicles?: string[];
 }

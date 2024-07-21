@@ -2,12 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { People } from './entities/people.entity';
 import { SwapiQueryBuilder } from 'src/swapi/swapi-query.builder';
 import { SwapiResource } from 'src/swapi/enums/swapi.resource';
+import { PaginatedResult } from 'src/common/interfaces/paginated-result.interface';
 
 @Injectable()
 export class PeopleService {
   constructor(private readonly starWarsApi: SwapiQueryBuilder) {}
 
-  async findAll(page = 1, filters: any): Promise<People[]> {
+  async findAll(page = 1, filters: any): Promise<PaginatedResult<People>> {
     const baseQuery = this.starWarsApi.query(SwapiResource.People);
 
     if (filters && filters.name) {
@@ -23,7 +24,7 @@ export class PeopleService {
     return response;
   }
 
-  async findById(id: number): Promise<Partial<People> | null> {
+  async findById(id: number): Promise<People | null> {
     const response = await this.starWarsApi
       .query(SwapiResource.People)
       .load([
@@ -43,7 +44,7 @@ export class PeopleService {
     };
   }
 
-  private formatResponse(response: any): Partial<People> {
+  private formatResponse(response: any): People {
     return {
       id: response.url.split('/').reverse()[1],
       name: response.name,
