@@ -18,6 +18,7 @@ import { Vehicle } from './vehicle/entities/vehicle.entity';
 import { Starship } from './starship/entities/starship.entity';
 import { CommonModule } from './common/common.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
         limit: 60,
       },
     ]),
+    CacheModule.register({ isGlobal: true }),
   ],
   controllers: [AppController],
   providers: [AppService],

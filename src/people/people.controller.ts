@@ -1,7 +1,17 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import {
+  CacheTTL,
+  Controller,
+  Get,
+  Param,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common';
 import { PeopleService } from './people.service';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @Controller('people')
+@UseInterceptors(CacheInterceptor)
+@CacheTTL(180)
 export class PeopleController {
   constructor(private readonly peopleService: PeopleService) {}
 
