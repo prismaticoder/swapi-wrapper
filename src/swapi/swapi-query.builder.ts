@@ -8,6 +8,7 @@ import { SwapiResource } from './enums/swapi.resource';
 import { AxiosError } from 'axios';
 import { ResourceNotFound } from './exceptions/resource-not-found.exception';
 import { ServiceUnavailable } from './exceptions/service-unavailable.exception';
+import { PaginatedResult } from 'src/common/interfaces/paginated-result.interface';
 
 @Injectable({ scope: Scope.REQUEST })
 export class SwapiQueryBuilder {
@@ -74,7 +75,9 @@ export class SwapiQueryBuilder {
 
     const url = this.constructUrl();
 
-    return await this.fetchUrl(url);
+    const response = await this.fetchUrl(url);
+
+    return this.standardizeIndexResponse(response);
   }
 
   async getById(id: number) {
@@ -177,7 +180,7 @@ export class SwapiQueryBuilder {
       return JSON.parse(JSON.stringify(response.data));
     } catch (exception) {
       if (exception instanceof AxiosError) {
-        if (exception.response.status === HttpStatus.NOT_FOUND) {
+        if (exception.response?.status === HttpStatus.NOT_FOUND) {
           throw new ResourceNotFound();
         } else {
           throw new ServiceUnavailable();
@@ -194,30 +197,24 @@ export class SwapiQueryBuilder {
   ) {
     const response = {};
 
-    const resolvedData = await Promise.allSettled(promisesToResolve);
+    const resolvedData = await Promise.all(promisesToResolve);
 
     resolvedData.forEach((data, index) => {
-      if (data.status === 'fulfilled') {
-        const field = urlIndexMap[index];
+      const field = urlIndexMap[index];
 
-        const { resource, column } = this.deconstructRelation(field);
+      const { resource, column } = this.deconstructRelation(field);
 
-        const value = column ? data.value[column] : data.value;
+      const value = column ? data[column] : data;
 
-        if (!response[resource]) {
-          response[resource] = value;
-        } else {
-          response[resource] =
-            response[resource] instanceof Array
-              ? response[resource]
-              : [response[resource]];
+      if (!response[resource]) {
+        response[resource] = value;
+      } else {
+        response[resource] =
+          response[resource] instanceof Array
+            ? response[resource]
+            : [response[resource]];
 
-          response[resource].push(value);
-        }
-      }
-
-      if (data.status === 'rejected') {
-        console.error(data.reason);
+        response[resource].push(value);
       }
     });
 
@@ -228,5 +225,19 @@ export class SwapiQueryBuilder {
     const [resource, column] = relation.split(':');
 
     return { resource, column };
+  }
+
+  private standardizeIndexResponse(response: any): PaginatedResult<any> | any {
+    if (!response.results) {
+      return response;
+    }
+
+    return {
+      total: response.count,
+      next: response.next,
+      previous: response.previous,
+      per_page: response.results.length,
+      results: response.results,
+    };
   }
 }
