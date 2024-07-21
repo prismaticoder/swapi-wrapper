@@ -9,6 +9,7 @@ import { AxiosError } from 'axios';
 import { ResourceNotFound } from './exceptions/resource-not-found.exception';
 import { ServiceUnavailable } from './exceptions/service-unavailable.exception';
 import { PaginatedResult } from 'src/common/interfaces/paginated-result.interface';
+import { randomUUID } from 'crypto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class SwapiQueryBuilder {
@@ -16,6 +17,8 @@ export class SwapiQueryBuilder {
     this.configService.get<string>('swapi.baseUrl');
 
   public readonly CACHE_TTL = 300_000;
+
+  public readonly LOCK_TTL = 3000;
 
   public readonly MAX_REQUEST_TIMEOUT = 3000;
 
@@ -162,13 +165,30 @@ export class SwapiQueryBuilder {
       throw new Error('Invalid URL');
     }
 
-    try {
-      const cacheKey = `swapi:${url}`;
+    const cacheKey = `swapi:${url}`;
+    const lockKey = `lock:${url}`;
 
+    try {
       const cachedData: any = await this.cacheManager.get(cacheKey);
 
       if (cachedData && this.useCache) {
         return JSON.parse(JSON.stringify(cachedData));
+      }
+
+      // Check for locks
+      const lockValue = randomUUID();
+
+      const lockAquired = await this.acquireLock(lockKey, lockValue);
+
+      if (!lockAquired) {
+        // wait for 2 seconds and then check cache again, if it doesn't exist in cache, call endpoint directly
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        const cachedData: any = await this.cacheManager.get(cacheKey);
+
+        if (cachedData) {
+          return JSON.parse(JSON.stringify(cachedData));
+        }
       }
 
       const response = await lastValueFrom(
@@ -188,6 +208,8 @@ export class SwapiQueryBuilder {
       }
 
       throw exception;
+    } finally {
+      await this.cacheManager.del(lockKey);
     }
   }
 
@@ -219,6 +241,18 @@ export class SwapiQueryBuilder {
     });
 
     return response;
+  }
+
+  private async acquireLock(key: string, value: string): Promise<boolean> {
+    const lock = await this.cacheManager.get(key);
+
+    if (lock) {
+      return false;
+    }
+
+    await this.cacheManager.set(key, value, this.LOCK_TTL);
+
+    return true;
   }
 
   private deconstructRelation(relation: string) {
