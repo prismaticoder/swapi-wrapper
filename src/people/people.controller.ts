@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { PeopleService } from './people.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
+import { JsonResponse } from 'src/common/helpers/json-response';
 
 @Controller('people')
 @UseInterceptors(CacheInterceptor)
@@ -19,13 +20,13 @@ export class PeopleController {
   async index(@Query() query: any) {
     const result = await this.peopleService.findAll(query.page, query);
 
-    return result;
+    return JsonResponse.create('People retrieved successfully.', result);
   }
 
   @Get(':id')
   async show(@Param('id') id: string | number) {
     const result = await this.peopleService.findById(Number(id));
 
-    return result;
+    return JsonResponse.create('Person retrieved successfully.', result);
   }
 }

@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { PlanetService } from './planet.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
+import { JsonResponse } from 'src/common/helpers/json-response';
 
 @Controller('planets')
 @UseInterceptors(CacheInterceptor)
@@ -17,11 +18,15 @@ export class PlanetController {
 
   @Get('')
   async index(@Query() query: any) {
-    return await this.planetService.findAll(query.page, query);
+    const planets = await this.planetService.findAll(query.page, query);
+
+    return JsonResponse.create('Planets retrieved successfully.', planets);
   }
 
   @Get(':id')
   async show(@Param('id') id: string | number) {
-    return await this.planetService.findById(Number(id));
+    const planet = await this.planetService.findById(Number(id));
+
+    return JsonResponse.create('Planet retrieved successfully.', planet);
   }
 }
