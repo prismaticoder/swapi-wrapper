@@ -4,12 +4,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { People } from './entities/people.entity';
 import { HttpModule } from '@nestjs/axios';
 import { PeopleController } from './people.controller';
-import { CommonModule } from 'src/common/common.module';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { SwapiModule } from 'src/swapi/swapi.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([People]), HttpModule, CommonModule],
+  imports: [TypeOrmModule.forFeature([People]), HttpModule, SwapiModule],
   providers: [
     PeopleService,
     {

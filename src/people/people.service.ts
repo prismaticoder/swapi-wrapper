@@ -1,7 +1,7 @@
-import { Injectable, Scope } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { People } from './entities/people.entity';
-import { SwapiQueryBuilder } from 'src/common/swapi-query.builder';
-import { SwapiResource } from 'src/common/enums/swapi.resource';
+import { SwapiQueryBuilder } from 'src/swapi/swapi-query.builder';
+import { SwapiResource } from 'src/swapi/enums/swapi.resource';
 
 @Injectable()
 export class PeopleService {

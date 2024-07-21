@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { SwapiQueryBuilder } from 'src/common/swapi-query.builder';
+import { SwapiQueryBuilder } from 'src/swapi/swapi-query.builder';
 import { Planet } from './entities/planet.entity';
-import { SwapiResource } from 'src/common/enums/swapi.resource';
+import { SwapiResource } from 'src/swapi/enums/swapi.resource';
 
 @Injectable()
 export class PlanetService {

@@ -16,9 +16,9 @@ import { Specie } from './specie/entities/specie.entity';
 import { Planet } from './planet/entities/planet.entity';
 import { Vehicle } from './vehicle/entities/vehicle.entity';
 import { Starship } from './starship/entities/starship.entity';
-import { CommonModule } from './common/common.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
+import { SwapiModule } from './swapi/swapi.module';
 
 @Module({
   imports: [
@@ -35,7 +35,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     PeopleModule,
     FilmModule,
     PlanetModule,
-    CommonModule,
+    SwapiModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60_000,
