@@ -7,7 +7,7 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(): JsonResponse {
+  index(): JsonResponse {
     return JsonResponse.create('May the Force be with you.'); // :)
   }
 }
