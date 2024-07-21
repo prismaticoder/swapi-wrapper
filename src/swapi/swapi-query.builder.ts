@@ -123,42 +123,6 @@ export class SwapiQueryBuilder {
     return url;
   }
 
-  private async resolveDependencies(response: any) {
-    const urlsToFetch = [];
-    const urlIndexMap = [];
-
-    this.dependenciesToResolve.forEach((field) => {
-      const { resource } = this.deconstructRelation(field);
-
-      if (!response[resource]) {
-        return;
-      }
-
-      const url = response[resource];
-
-      if (url instanceof Array) {
-        url.forEach((url) => {
-          urlsToFetch.push(url);
-          urlIndexMap.push(field);
-        });
-      } else {
-        urlsToFetch.push(url);
-        urlIndexMap.push(field);
-      }
-
-      response[resource] = null;
-    });
-
-    const promisesToResolve = urlsToFetch.map((url) => this.fetchUrl(url));
-
-    const resolvedData = await this.resolvePromises(
-      promisesToResolve,
-      urlIndexMap,
-    );
-
-    return { ...response, ...resolvedData };
-  }
-
   private async fetchUrl(url: string) {
     // validate base url
     if (!url.startsWith(this.baseUrl)) {
@@ -211,6 +175,42 @@ export class SwapiQueryBuilder {
     } finally {
       await this.cacheManager.del(lockKey);
     }
+  }
+
+  private async resolveDependencies(response: any) {
+    const urlsToFetch = [];
+    const urlIndexMap = [];
+
+    this.dependenciesToResolve.forEach((field) => {
+      const { resource } = this.deconstructRelation(field);
+
+      if (!response[resource]) {
+        return;
+      }
+
+      const url = response[resource];
+
+      if (url instanceof Array) {
+        url.forEach((url) => {
+          urlsToFetch.push(url);
+          urlIndexMap.push(field);
+        });
+      } else {
+        urlsToFetch.push(url);
+        urlIndexMap.push(field);
+      }
+
+      response[resource] = null;
+    });
+
+    const promisesToResolve = urlsToFetch.map((url) => this.fetchUrl(url));
+
+    const resolvedData = await this.resolvePromises(
+      promisesToResolve,
+      urlIndexMap,
+    );
+
+    return { ...response, ...resolvedData };
   }
 
   private async resolvePromises(
