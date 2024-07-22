@@ -4,7 +4,7 @@ import { HttpModule } from '@nestjs/axios';
 import { PeopleController } from './people.controller';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import { SwapiModule } from 'src/swapi/swapi.module';
+import { SwapiModule } from '../swapi/swapi.module';
 
 @Module({
   imports: [HttpModule, SwapiModule],

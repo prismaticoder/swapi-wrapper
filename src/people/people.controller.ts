@@ -9,8 +9,8 @@ import {
 } from '@nestjs/common';
 import { PeopleService } from './people.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import { JsonResponse } from 'src/common/helpers/json-response';
-import { SwapiExceptionFilter } from 'src/swapi/filters/swapi-exception.filter';
+import { JsonResponse } from '../common/helpers/json-response';
+import { SwapiExceptionFilter } from '../swapi/filters/swapi-exception.filter';
 
 @Controller('people')
 @UseInterceptors(CacheInterceptor)
