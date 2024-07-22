@@ -188,6 +188,25 @@ describe('SwapiQueryBuilder', () => {
       });
     });
 
+    it('should save data to cache after calling the API', async () => {
+      jest.spyOn(cacheManager, 'get').mockReturnValue(null);
+      const httpSpy = jest
+        .spyOn(httpService, 'get')
+        .mockReturnValue(of(httpResponse));
+
+      const setSpy = jest.spyOn(cacheManager, 'set');
+
+      await service.withCache().query(SwapiResource.People).get();
+
+      expect(httpSpy).toHaveBeenCalled();
+
+      expect(setSpy).toHaveBeenLastCalledWith(
+        peopleCacheKey,
+        peopleResponse,
+        service.CACHE_TTL,
+      );
+    });
+
     it('should release the lock after getting the data', async () => {
       const cacheSpy = jest.spyOn(cacheManager, 'get');
 
@@ -289,8 +308,8 @@ describe('SwapiQueryBuilder', () => {
       expect(result).toEqual({
         ...singlePersonResponse,
         homeworld: singlePersonResponse.name,
-        vehicles: singlePersonResponse.name,
-        starships: singlePersonResponse.name,
+        vehicles: [singlePersonResponse.name],
+        starships: [singlePersonResponse.name],
       });
     });
 

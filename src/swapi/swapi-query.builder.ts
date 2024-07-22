@@ -193,11 +193,11 @@ export class SwapiQueryBuilder {
       if (url instanceof Array) {
         url.forEach((url) => {
           urlsToFetch.push(url);
-          urlIndexMap.push(field);
+          urlIndexMap.push({ isArray: true, field });
         });
       } else {
         urlsToFetch.push(url);
-        urlIndexMap.push(field);
+        urlIndexMap.push({ isArray: false, field });
       }
 
       response[resource] = null;
@@ -213,28 +213,24 @@ export class SwapiQueryBuilder {
     return { ...response, ...resolvedData };
   }
 
-  private async resolvePromises(
-    promisesToResolve: any[],
-    urlIndexMap: string[],
-  ) {
+  private async resolvePromises(promisesToResolve: any[], urlIndexMap: any[]) {
     const response = {};
 
     const resolvedData = await Promise.all(promisesToResolve);
 
     resolvedData.forEach((data, index) => {
-      const field = urlIndexMap[index];
+      const { isArray, field } = urlIndexMap[index];
 
       const { resource, column } = this.deconstructRelation(field);
 
       const value = column ? data[column] : data;
 
       if (!response[resource]) {
-        response[resource] = value;
+        response[resource] = isArray ? [value] : value;
       } else {
-        response[resource] =
-          response[resource] instanceof Array
-            ? response[resource]
-            : [response[resource]];
+        response[resource] = isArray
+          ? response[resource]
+          : [response[resource]];
 
         response[resource].push(value);
       }
