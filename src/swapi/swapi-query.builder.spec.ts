@@ -38,8 +38,8 @@ describe('SwapiQueryBuilder', () => {
 
   const peopleResponse = {
     results: [singlePersonResponse],
-    next: 'next',
-    previous: 'previous',
+    next: null,
+    previous: null,
     count: 1,
   };
 
@@ -115,8 +115,8 @@ describe('SwapiQueryBuilder', () => {
     it('should return the response in the cache if available', async () => {
       const response = {
         results: [singlePersonResponse],
-        next: 'next',
-        previous: 'previous',
+        next: null,
+        previous: null,
         count: 1,
       };
 
@@ -132,7 +132,7 @@ describe('SwapiQueryBuilder', () => {
 
       expect(result).toEqual({
         total: response.count,
-        per_page: response.results.length,
+        per_page: service.ITEMS_PER_PAGE,
         previous: response.previous,
         next: response.next,
         results: [singlePersonResponse],
@@ -156,7 +156,7 @@ describe('SwapiQueryBuilder', () => {
 
       expect(result).toEqual({
         total: peopleResponse.count,
-        per_page: peopleResponse.results.length,
+        per_page: service.ITEMS_PER_PAGE,
         previous: peopleResponse.previous,
         next: peopleResponse.next,
         results: peopleResponse.results,
@@ -181,7 +181,7 @@ describe('SwapiQueryBuilder', () => {
 
       expect(result).toEqual({
         total: peopleResponse.count,
-        per_page: peopleResponse.results.length,
+        per_page: service.ITEMS_PER_PAGE,
         previous: peopleResponse.previous,
         next: peopleResponse.next,
         results: peopleResponse.results,

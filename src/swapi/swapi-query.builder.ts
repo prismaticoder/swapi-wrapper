@@ -22,6 +22,8 @@ export class SwapiQueryBuilder {
 
   public readonly MAX_REQUEST_TIMEOUT = 3000;
 
+  public readonly ITEMS_PER_PAGE = 10;
+
   private useCache = true;
 
   private resource: SwapiResource = null;
@@ -266,7 +268,10 @@ export class SwapiQueryBuilder {
       total: response.count,
       next: this.substituteBaseUrl(response.next),
       previous: this.substituteBaseUrl(response.previous),
-      per_page: response.results.length > 10 ? response.results.length : 10,
+      per_page:
+        response.results.length > this.ITEMS_PER_PAGE
+          ? response.results.length
+          : this.ITEMS_PER_PAGE,
       results: response.results,
     };
   }
