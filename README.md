@@ -1,38 +1,72 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Star Wars API Wrapper
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Introduction
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Welcome to the Star Wars API Wrapper! This project provides a simple and efficient way to access detailed information about characters (people) and planets from the Star Wars universe.
+
+Whether you're developing a Star Wars-themed application, conducting data analysis, or just exploring the rich universe of Star Wars, this wrapper ensures a seamless and reliable experience.
+
+The project was built using [Nest.js](https://github.com/nestjs/nest), a framework suited for the purpose of building scalable Node.js server side applications.
+
+## Prerequisites
+
+To aid with a quick setup of this project on your local environment, I have taken the liberty to add a [Docker](https://docs.docker.com/get-docker/) configuration to the setup to make things easier (details regarding this are outlined in the later sections of this document)
+
+However, if you decide not to go the Docker route, the following requirements are needed to successfully run the application:
+
+- [NPM (Node Package Manager)](https://www.npmjs.com/get-npm)
+- [Node.js v18+](https://nodejs.org/en/download/)
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+The Star Wars API Wrapper is a simple and efficient tool designed to provide easy access to detailed information about characters (people) and planets from the Star Wars universe. This wrapper simplifies the process of making requests to the Star Wars API, handling aspects such as rate limiting, timeouts, and concurrency control to ensure reliable and efficient data retrieval.
 
-## Installation
+With this API wrapper, you can:
+
+- Fetch detailed information about Star Wars characters.
+- Retrieve data about various planets in the Star Wars universe.
+
+Whether you're building a Star Wars fan site, creating a data analysis project, or just exploring the Star Wars API for fun, this wrapper offers a convenient and reliable way to interact with the API.
+
+Seeing that this project is API-based, I have taken the liberty to create a Postman documentation outlining all endpoints on the project (alongside relevant examples). View the documentation [here](https://documenter.getpostman.com/view/13400573/2s935pohwv)
+
+## Installation (With Docker)
+
+- Clone the repository:
+
+```
+git clone https://github.com/prismaticoder/swapi-wrapper.git
+```
+
+- Copy the example env file into your env
+
+```
+cp .env.example .env
+```
+
+- Build the container/image
+
+```
+docker-compose up --build
+```
+
+- You can now access the project on port <b>3000</b> 🎉
+
+## Installation (Without Docker)
+
+- Clone the repository:
+
+```
+git clone https://github.com/prismaticoder/swapi-wrapper.git
+```
+
+- Install dependencies
 
 ```bash
 $ npm install
 ```
 
-## Running the app
+- Running the app
 
 ```bash
 # development
@@ -44,6 +78,23 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
+
+## Design Considerations
+
+When building the Star Wars API Wrapper, several design considerations were taken into account to ensure reliability, efficiency, and optimal performance:
+
+1. **Timeout Implementation**:
+
+   - A timeout of 3 seconds is applied to all calls to the Star Wars API. This ensures that requests fail fast if the API does not respond within the expected timeframe, accounting for reliability especially when fetching associated resources.
+
+2. **Rate Limiting**:
+
+   - The API is rate limited to 30 requests every 5 minutes. This is designed to stay well within the Star Wars API's upper bound limit of 10,000 requests per day, preventing overuse and ensuring fair access for all users. This also helps in managing traffic and maintaining performance.
+
+3. **Concurrency Control**:
+   - A lock mechanism has been implemented to manage concurrency and prevent overloading the Star Wars API. This ensures that simultaneous requests are handled efficiently, reducing the risk of server overloads and maintaining the stability of the API.
+
+These considerations help in providing a robust and reliable API wrapper for accessing Star Wars data while respecting the limitations and maintaining the performance of the underlying Star Wars API.
 
 ## Test
 
@@ -58,16 +109,6 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Support
+## Links
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+- [Postman Documentation](https://documenter.getpostman.com/view/13400573/2sA3kVj1cL)
