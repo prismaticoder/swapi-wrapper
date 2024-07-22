@@ -4,25 +4,26 @@ import { SwapiQueryBuilder } from '../swapi/swapi-query.builder';
 import { SwapiResource } from '../swapi/enums/swapi.resource';
 import { ResourceNotFound } from '../swapi/exceptions/resource-not-found.exception';
 
-const singlePlanetResponse = {
-  name: 'Tatooine',
-  diameter: '10465',
-  rotation_period: '23',
-  orbital_period: '304',
-  gravity: '1 standard',
-  population: '200000',
-  climate: 'arid',
-  terrain: 'desert',
-  surface_water: '1',
-  residents: ['Luke Skywalker', 'Cliegg Lars'],
-  films: ['A New Hope', 'Return of the Jedi'],
-  created: '2014-12-09T13:50:51.644000Z',
-  edited: '2014-12-10T13:52:43.172000Z',
-  url: 'https://swapi.dev/api/people/1/',
-};
 describe('PlanetService', () => {
   let service: PlanetService;
   let starWarsApiMock: SwapiQueryBuilder;
+
+  const singlePlanetResponse = {
+    name: 'Tatooine',
+    diameter: '10465',
+    rotation_period: '23',
+    orbital_period: '304',
+    gravity: '1 standard',
+    population: '200000',
+    climate: 'arid',
+    terrain: 'desert',
+    surface_water: '1',
+    residents: ['Luke Skywalker', 'Cliegg Lars'],
+    films: ['A New Hope', 'Return of the Jedi'],
+    created: '2014-12-09T13:50:51.644000Z',
+    edited: '2014-12-10T13:52:43.172000Z',
+    url: 'https://swapi.dev/api/people/1/',
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
