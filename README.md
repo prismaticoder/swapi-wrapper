@@ -28,7 +28,7 @@ With this API wrapper, you can:
 
 Whether you're building a Star Wars fan site, creating a data analysis project, or just exploring the Star Wars API for fun, this wrapper offers a convenient and reliable way to interact with the API.
 
-Seeing that this project is API-based, I have taken the liberty to create a Postman documentation outlining all endpoints on the project (alongside relevant examples). View the documentation [here](https://documenter.getpostman.com/view/13400573/2s935pohwv)
+Seeing that this project is API-based, I have taken the liberty to create a Postman documentation outlining all endpoints on the project (alongside relevant examples). View the documentation [here](https://documenter.getpostman.com/view/13400573/2sA3kVj1cL)
 
 ## Installation (With Docker)
 
