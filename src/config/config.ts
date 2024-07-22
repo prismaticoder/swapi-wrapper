@@ -1,5 +1,5 @@
 export default () => ({
-  port: parseInt(process.env.APP_PORT, 10) || 3000,
+  baseUrl: process.env.BASE_URL || 'http://localhost',
   swapi: {
     baseUrl: 'https://swapi.dev/api',
   },

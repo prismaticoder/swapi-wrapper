@@ -258,16 +258,26 @@ export class SwapiQueryBuilder {
   }
 
   private standardizeIndexResponse(response: any): PaginatedResult<any> | any {
-    if (!response.results) {
+    if (!('results' in response)) {
       return response;
     }
 
     return {
       total: response.count,
-      next: response.next,
-      previous: response.previous,
-      per_page: response.results.length,
+      next: this.substituteBaseUrl(response.next),
+      previous: this.substituteBaseUrl(response.previous),
+      per_page: response.results.length > 10 ? response.results.length : 10,
       results: response.results,
     };
+  }
+
+  private substituteBaseUrl(url?: string): string | null {
+    if (!url) {
+      return null;
+    }
+
+    return url
+      .replace(this.baseUrl, this.configService.get<string>('baseUrl') + '/v1')
+      .replace('search=', 'name=');
   }
 }
