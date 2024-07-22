@@ -10,6 +10,7 @@ import { of, throwError } from 'rxjs';
 import { ServiceUnavailable } from './exceptions/service-unavailable.exception';
 import { HttpStatus } from '@nestjs/common';
 import { ResourceNotFound } from './exceptions/resource-not-found.exception';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 describe('SwapiQueryBuilder', () => {
   let service: SwapiQueryBuilder;
@@ -82,6 +83,10 @@ describe('SwapiQueryBuilder', () => {
         {
           provide: 'CACHE_MANAGER',
           useValue: { get: jest.fn(), set: jest.fn(), del: jest.fn() },
+        },
+        {
+          provide: WINSTON_MODULE_PROVIDER,
+          useValue: { error: jest.fn(), info: jest.fn(), alert: jest.fn() },
         },
       ],
     }).compile();

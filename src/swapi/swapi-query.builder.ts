@@ -10,6 +10,8 @@ import { ResourceNotFound } from './exceptions/resource-not-found.exception';
 import { ServiceUnavailable } from './exceptions/service-unavailable.exception';
 import { PaginatedResult } from 'src/common/interfaces/paginated-result.interface';
 import { randomUUID } from 'crypto';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
 
 @Injectable({ scope: Scope.REQUEST })
 export class SwapiQueryBuilder {
@@ -40,6 +42,7 @@ export class SwapiQueryBuilder {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
   withoutCache() {
@@ -138,6 +141,8 @@ export class SwapiQueryBuilder {
       const cachedData: any = await this.cacheManager.get(cacheKey);
 
       if (cachedData && this.useCache) {
+        this.logger.info(`Fetching URL result from cache: ${url}`);
+
         return JSON.parse(JSON.stringify(cachedData));
       }
 
@@ -147,6 +152,8 @@ export class SwapiQueryBuilder {
       const lockAquired = await this.acquireLock(lockKey, lockValue);
 
       if (!lockAquired) {
+        this.logger.alert(`Lock not acquired. Waiting for lock: ${lockKey}`);
+
         // wait for 2 seconds and then check cache again, if it doesn't exist in cache, call endpoint directly
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -156,6 +163,8 @@ export class SwapiQueryBuilder {
           return JSON.parse(JSON.stringify(cachedData));
         }
       }
+
+      this.logger.info(`Fetching swapi URL: ${url}`);
 
       const response = await lastValueFrom(
         this.httpService.get(url, { timeout: this.MAX_REQUEST_TIMEOUT }),
@@ -169,6 +178,8 @@ export class SwapiQueryBuilder {
         if (exception.response?.status === HttpStatus.NOT_FOUND) {
           throw new ResourceNotFound();
         } else {
+          this.logger.error('Swapi service unavailable', exception);
+
           throw new ServiceUnavailable();
         }
       }

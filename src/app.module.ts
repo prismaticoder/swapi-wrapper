@@ -8,6 +8,8 @@ import { PlanetModule } from './planet/planet.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import { SwapiModule } from './swapi/swapi.module';
+import { WinstonModule } from 'nest-winston';
+import * as winston from 'winston';
 
 @Module({
   imports: [
@@ -22,6 +24,13 @@ import { SwapiModule } from './swapi/swapi.module';
       },
     ]),
     CacheModule.register({ isGlobal: true }),
+    WinstonModule.forRoot({
+      transports: [new winston.transports.Console()],
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.prettyPrint(),
+      ),
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
